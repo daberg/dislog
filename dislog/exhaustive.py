@@ -1,28 +1,28 @@
 from dislog.debug import debug
 
 
-def exhaustive(alfa, beta, p):
-    """Computes the discrete logarithm log_{alfa}(beta) in Z*_{p}, that is the
-    logarithm of beta to the base of alpha in the multiplicative group of the
-    integers modulo p.
+def exhaustive(alfa, beta, n):
+    """Computes the discrete logarithm log_{alfa}(beta)
+
+    Given a generator alfa of a cyclic group G, another element beta of the
+    group G and the order n of the the group G, computes the discrete logarithm
+    of beta to the base of alpha.
 
     Args:
-        alfa: base of the logarithm, should be a generator of Z*_{p} to
-              guarantee the existence of the logarithm
-        beta: logarithm argument, must belong to Z*_{p}
-        p: modulo of the integers
+        alfa: logarithm base, must support equality, multiplication and
+            exponentiation; should be a generator to guarantee the existence
+            of the logarithm
+        beta: logarithm argument, must support equality and multiplication
+        n: order of the group containing alfa and beta
 
     Returns:
         The discrete logarithm log_{alfa}(beta) if it exists, None otherwise
     """
-    # Order of the cyclic group
-    n = p - 1
-
     # Current exponent and power value being evaluated
     exp = 0
-    power = 1
+    power = alfa ** 0
 
-    debug("Alfa = {}, Beta = {}, p = {}", alfa, beta, p)
+    debug("Alfa = {}, Beta = {}", alfa, beta)
     debug("Alfa^{} = {}", exp, power)
 
     while power != beta:
@@ -32,7 +32,7 @@ def exhaustive(alfa, beta, p):
         if exp == n:
             return None
 
-        power = power * alfa % p
+        power = power * alfa
 
         debug("Alfa^{} = {}".format(exp, power))
 
