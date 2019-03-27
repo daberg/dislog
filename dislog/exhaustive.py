@@ -24,8 +24,8 @@ def exhaustive(alfa, beta, n):
     exp = 0
     power = alfa ** 0
 
-    debug("Alfa = {}, Beta = {}", alfa, beta)
-    debug("Alfa^{} = {}", exp, power)
+    debug("[Exhaustive] Alfa = {}, Beta = {}", alfa, beta)
+    debug("[Exhaustive] Alfa^{} = {}", exp, power)
 
     while power != beta:
         exp = exp + 1
@@ -36,6 +36,6 @@ def exhaustive(alfa, beta, n):
 
         power = power * alfa
 
-        debug("Alfa^{} = {}".format(exp, power))
+        debug("[Exhaustive] Alfa^{} = {}".format(exp, power))
 
     return exp
