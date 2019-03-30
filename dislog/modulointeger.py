@@ -24,6 +24,9 @@ class ModuloInteger:
             return self.value == other.value
         return False
 
+    def __hash__(self):
+        return hash(self.value)
+
     def __mul__(self, other):
         if not isinstance(other, ModuloInteger):
             raise TypeError("Trying to multiply by a non-ModuloInteger object")
@@ -39,10 +42,10 @@ class ModuloInteger:
             raise TypeError("Exponent must be an integer")
 
         if exponent == 0:
-            newvalue = 1
-        else:
-            # Could be optimized memory-wise
-            newvalue = (self.value ** abs(exponent)) % self.modulus
+            return ModuloInteger(1, self.modulus)
+
+        # Could be optimized memory-wise
+        newvalue = (self.value ** abs(exponent)) % self.modulus
 
         if exponent < 0:
             return ModuloInteger(newvalue, self.modulus).inverse()
@@ -83,9 +86,9 @@ class ModuloInteger:
         x = 0
         x_new = 1
 
-        debug("[ModuloInteger] Inverse of {}".format(self))
+        debug(self.inverse, "Computing inverse of {}".format(self))
         debug(
-            "[ModuloInteger]\t\tr={}\tr_new={}\tx={}\tx_new={}"
+            self.inverse, "\t\tr={}\tr_new={}\tx={}\tx_new={}"
             .format(r, r_new, x, x_new)
         )
 
@@ -96,7 +99,7 @@ class ModuloInteger:
             x, x_new = x_new, x - quotient * x_new
 
             debug(
-                "[ModuloInteger]\tq={}\tr={}\tr_new={}\tx={}\tx_new={}"
+                self.inverse, "\tq={}\tr={}\tr_new={}\tx={}\tx_new={}"
                 .format(quotient, r, r_new, x, x_new)
             )
 
@@ -110,7 +113,8 @@ class ModuloInteger:
         # Extended GCD finds either one or the other.
         # If it finds the negative one, n must be added to make it positive.
         if x < 0:
-            debug("[ModuloInteger] Adding {} to x".format(self.modulus))
+            debug(self.inverse, "Adding {} to x".format(self.modulus))
             x = x + self.modulus
 
+        debug(self.inverse, "Inverse value: {}", x)
         return ModuloInteger(x, self.modulus)

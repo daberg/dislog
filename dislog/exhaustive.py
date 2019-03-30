@@ -24,18 +24,19 @@ def exhaustive(alfa, beta, n):
     exp = 0
     power = alfa ** 0
 
-    debug("[Exhaustive] Alfa = {}, Beta = {}", alfa, beta)
-    debug("[Exhaustive] Alfa^{} = {}", exp, power)
+    debug(exhaustive, "alfa = {}, beta = {}", alfa, beta)
+    debug(exhaustive, "alfa^{} = {}", exp, power)
 
     while power != beta:
         exp = exp + 1
 
         # alfa is not a generator
         if exp == n:
+            debug(exhaustive, "Logarithm does not exist")
             return None
 
         power = power * alfa
+        debug(exhaustive, "alfa^{} = {}".format(exp, power))
 
-        debug("[Exhaustive] Alfa^{} = {}".format(exp, power))
-
+    debug(exhaustive, "Logarithm = {}", exp)
     return exp

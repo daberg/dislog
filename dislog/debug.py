@@ -1,11 +1,14 @@
 import os
 
 
-def printf(string, *formatargs):
-    print(string.format(*formatargs))
+def debugprint(function, message, *formatargs):
+    print(
+        "[{}:{}]\t".format(function.__module__, function.__name__)
+        + message.format(*formatargs)
+    )
 
 def dummy(*args):
     pass
 
 
-debug = printf if "DISLOGDEBUG" in os.environ else dummy
+debug = debugprint if "DISLOGDEBUG" in os.environ else dummy
