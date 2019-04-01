@@ -41,16 +41,17 @@ class ModuloInteger:
         if not isinstance(exponent, int):
             raise TypeError("Exponent must be an integer")
 
-        if exponent == 0:
-            return ModuloInteger(1, self.modulus)
+        base = self.inverse() if exponent < 0 else self
 
-        # Could be optimized memory-wise
-        newvalue = (self.value ** abs(exponent)) % self.modulus
+        if base is None:
+            debug(self.__pow__, "Base not invertible, power does not exist")
+            return None
 
-        if exponent < 0:
-            return ModuloInteger(newvalue, self.modulus).inverse()
+        retval = 1
+        for i in range(abs(exponent)):
+            retval = (retval * base.value) % self.modulus
 
-        return ModuloInteger(newvalue, self.modulus)
+        return ModuloInteger(retval, self.modulus)
 
     def __str__(self):
         return "{} (mod {})".format(self.value, self.modulus)
@@ -105,6 +106,7 @@ class ModuloInteger:
 
         # No solution exists, since gcd(a, n) != 1 (a and n are not coprime)
         if r > 1:
+            debug(self.inverse, "Inverse does not exist")
             return None
 
         # Left solutions are of the form: x + kn.
