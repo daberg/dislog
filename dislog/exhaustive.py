@@ -2,11 +2,11 @@ from dislog.debug import debug
 
 
 def exhaustive(alfa, beta, n):
-    """Computes the discrete logarithm log_{alfa}(beta).
+    """Computes discrete logarithm with a naive exhaustive approach.
 
     Given a generator alfa of a cyclic group G, another element beta of the
     group G and the order n of the group G, computes the discrete logarithm
-    of beta to the base of alpha.
+    of beta to the base of alpha with an exhaustive approach.
 
     Args:
         alfa: logarithm base, must support internal equality and multiplication
