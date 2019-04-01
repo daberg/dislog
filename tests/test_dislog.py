@@ -6,7 +6,11 @@ class DislogTestCase(unittest.TestCase):
     def test_modulo_integer(self):
         # Entry structure: (alfa, beta, modulus, expected value)
         cases = [
-            (5, 35, 97, 32)
+            (5, 35, 97, 32),
+            (5910, 1870, 9001, 1329),
+            (897, 654, 1709, None),
+            (0, 10, 11, None),
+            (2, 1, 3, 0)
         ]
 
         for case in cases:
