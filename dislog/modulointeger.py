@@ -10,14 +10,22 @@ class ModuloInteger:
         if not isinstance(modulus, Number):
             raise TypeError("Modulus must be initialized with a number")
 
-        if (modulus != int(modulus)
+        int_value = int(value)
+        int_modulus = int(modulus)
+
+        if value != int_value:
+            raise ValueError(
+                "Value must be initialized with an integer"
+            )
+
+        if (modulus != int_modulus
             or modulus < 1):
             raise ValueError(
                 "Modulus must be initialized with an integer greater than 0"
             )
 
-        self.modulus = int(modulus)
-        self.value = int(value) % self.modulus
+        self.modulus = int_modulus
+        self.value = int_value % self.modulus
 
     def __eq__(self, other):
         if isinstance(other, ModuloInteger):
