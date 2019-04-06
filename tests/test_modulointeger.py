@@ -6,11 +6,11 @@ class ModuloIntegerTestCase(unittest.TestCase):
     def test_modulointeger_inverse(self):
         # Case list entry struture: (value, modulus, expected_inverse_value)
         cases = [
-            (4, 9, 7),
+            (1, 3, 1),
             (2, 3, 2),
-            (67, 119, 16),
-            (0, 3, None),
-            (1, 3, 1)
+            (2, 6, None),
+            (4, 9, 7),
+            (67, 119, 16)
         ]
 
         for case in cases:

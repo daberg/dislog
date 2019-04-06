@@ -9,7 +9,6 @@ class DislogTestCase(unittest.TestCase):
             (5, 35, 97, 32),
             (5910, 1870, 9001, 1329),
             (897, 654, 1709, None),
-            (0, 10, 11, None),
             (2, 1, 3, 0)
         ]
 
