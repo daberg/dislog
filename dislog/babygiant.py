@@ -1,5 +1,6 @@
+import decimal
 import math
-from dislog.debug import debug
+from dislog import debug
 
 
 def babygiant(alfa, beta, n):
@@ -21,9 +22,21 @@ def babygiant(alfa, beta, n):
         The discrete logarithm log_{alfa}(beta) (the integer x such that alfa
         to the power of x equals beta) if it exists, None otherwise
     """
-    m = math.ceil(math.sqrt(n))
+    debug(babygiant, "alfa={}\tbeta={}\tn={}\t", alfa, beta, n)
 
-    debug(babygiant, "alfa={}\tbeta={}\tn={}\tm={}", alfa, beta, n, m)
+    # Conversion to handle decimal operations on big numbers
+    dec_n = decimal.Decimal(n)
+
+    # Set precision for calculating the square root of n up to at least one
+    # digit beyond the decimal point
+    num_digits = dec_n.adjusted() + 1
+    prec = num_digits // 2 + 2
+    context = decimal.Context(prec=prec, rounding=decimal.ROUND_UP)
+
+    # Find root of order and round it up
+    dec_m = dec_n.sqrt(context)
+    m = int(dec_m.to_integral_value(context=context))
+    debug(babygiant, "m={} rounded_m={}", dec_m, m)
 
     # Exponent lookup table
     # Key: a^j, value: j
