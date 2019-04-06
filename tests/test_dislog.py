@@ -4,7 +4,7 @@ import unittest
 
 class DislogTestCase(unittest.TestCase):
     def test_modulo_integer(self):
-        # Entry structure: (alfa, beta, modulus, expected value)
+        # Entry structure: (alpha, beta, modulus, expected value)
         cases = [
             (5, 35, 97, 32),
             (5910, 1870, 9001, 1329),
@@ -13,19 +13,19 @@ class DislogTestCase(unittest.TestCase):
         ]
 
         for case in cases:
-            alfa = dislog.ModuloInteger(case[0], case[2])
+            alpha = dislog.ModuloInteger(case[0], case[2])
             beta = dislog.ModuloInteger(case[1], case[2])
             n = case[2] - 1
             expected_value = case[3]
 
             self.assertEqual(
-                dislog.exhaustive(alfa, beta, n),
+                dislog.exhaustive(alpha, beta, n),
                 expected_value,
                 "Incorrect return value for exhaustive algorithm"
             )
 
             self.assertEqual(
-                dislog.babygiant(alfa, beta, n),
+                dislog.babygiant(alpha, beta, n),
                 expected_value,
                 "Incorrect return value for baby-step giant-step algorithm"
             )

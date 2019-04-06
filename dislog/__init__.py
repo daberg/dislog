@@ -6,14 +6,14 @@ Usage example:
     import dislog
 
 
-    # Initialize alfa (5) and beta (35) belonging to the multiplicative group
-    # of integers Z_{97}, of order 96, for which alfa is a generator
-    alfa = dislog.ModuloInteger(5, 97)
+    # Initialize alpha (5) and beta (35) belonging to the multiplicative group
+    # of integers Z_{97}, of order 96, for which alpha is a generator
+    alpha = dislog.ModuloInteger(5, 97)
     beta = dislog.ModuloInteger(35, 97)
     n = 96
 
-    # Compute the discrete logarithm log_{alfa}(beta) with an exhaustive search
-    dislog.exhaustive(alfa, beta, n)
+    # Compute the discrete logarithm log_{alpha}(beta) with an exhaustive search
+    dislog.exhaustive(alpha, beta, n)
 """
 
 __all__ = ['babygiant', 'exhaustive', 'ModuloInteger']

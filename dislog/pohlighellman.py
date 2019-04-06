@@ -2,31 +2,31 @@ import dislog
 from dislog.util import debug
 
 
-def pohlighellman(alfa, beta, n, n_factors):
+def pohlighellman(alpha, beta, n, n_factors):
     """Computes discrete logarithm using Pohlig-Hellman algorithm.
 
-    Given a generator alfa of a cyclic group G, another element beta of the
+    Given a generator alpha of a cyclic group G, another element beta of the
     group G and the order n of the group G, computes the discrete logarithm
     of beta to the base of alpha using the Pohlig-Hellman algorithm.
 
     Args:
-        alfa: logarithm base, must support internal equality and
+        alpha: logarithm base, must support internal equality and
             multiplication and integer exponentiation; should be a generator to
             guarantee the existence of the logarithm
         beta: logarithm argument, must support internal equality and
             multiplication
-        n: order of the group containing alfa and beta
+        n: order of the group containing alpha and beta
         n_factors: dictionary containing the factors of n as keys and their
             multiplicity as values
 
     Returns:
-        The discrete logarithm log_{alfa}(beta) (the integer x such that alfa
+        The discrete logarithm log_{alpha}(beta) (the integer x such that alpha
         to the power of x equals beta) if it exists, None otherwise
     """
     X = []
 
     for q, e in n_factors.items():
-        base = alfa ** (n // q)
+        base = alpha ** (n // q)
 
         arg_base = beta
         l = 0
