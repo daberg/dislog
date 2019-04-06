@@ -51,12 +51,13 @@ def babygiant(alpha, beta, n):
             exp_table[power] = j
         debug(babygiant, "Adding {} : {} to table", power, j)
 
-    factor = alpha ** (-m) # Candidate is multiplied by it at every iteration
+    factor = alpha ** (-m)
     if factor is None:
         debug(babygiant, "alpha^-m does not exist, cannot use babygiant")
         return None
 
-    candidate = beta # Equals beta * (alpha ^ m)^i at each iteration
+    # At each iteration, candidate = beta * ((alpha ^ -m) ^ i)
+    candidate = beta
     for i in range(m):
         debug(babygiant, "Checking presence of {} in lookup table", candidate)
         if candidate in exp_table:
