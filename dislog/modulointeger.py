@@ -1,4 +1,4 @@
-from dislog.debug import debug
+from dislog.util import debug
 from numbers import Number
 
 

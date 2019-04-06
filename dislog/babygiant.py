@@ -1,6 +1,6 @@
 import decimal
 import math
-from dislog import debug
+from dislog.util import debug
 
 
 def babygiant(alfa, beta, n):
