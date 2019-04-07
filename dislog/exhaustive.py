@@ -20,12 +20,13 @@ def exhaustive(alpha, beta, n):
         The discrete logarithm log_{alpha}(beta) (the integer x such that alpha
         to the power of x equals beta) if it exists, None otherwise
     """
+    debug(exhaustive, "alpha={}, beta={}, n={}", alpha, beta, n)
+
     # Current exponent and power value being evaluated
     exp = 0
     power = alpha ** 0
 
-    debug(exhaustive, "alpha = {}, beta = {}", alpha, beta)
-    debug(exhaustive, "alpha^{} = {}", exp, power)
+    debug(exhaustive, "alpha^{}={}", exp, power)
 
     while power != beta:
         exp = exp + 1
