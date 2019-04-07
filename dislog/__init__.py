@@ -16,9 +16,10 @@ Usage example:
     dislog.exhaustive(alpha, beta, n)
 """
 
-__all__ = ['babygiant', 'exhaustive', 'ModuloInteger']
+__all__ = ['babygiant', 'exhaustive', 'ModuloInteger', 'pohlighellman']
 
 
 from dislog.babygiant import babygiant
 from dislog.exhaustive import exhaustive
 from dislog.modulointeger import ModuloInteger
+from dislog.pohlighellman import pohlighellman

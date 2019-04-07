@@ -1,15 +1,16 @@
 import dislog
 import unittest
+from sympy.ntheory import factorint
 
 
 class DislogTestCase(unittest.TestCase):
     def test_modulo_integer(self):
         # Entry structure: (alpha, beta, modulus, expected value)
         cases = [
+            (2, 1, 3, 0),
             (5, 35, 97, 32),
-            (5910, 1870, 9001, 1329),
-            (897, 654, 1709, None),
-            (2, 1, 3, 0)
+            (71, 210, 251, 197),
+            (897, 654, 1709, None)
         ]
 
         for case in cases:
@@ -28,6 +29,12 @@ class DislogTestCase(unittest.TestCase):
                 dislog.babygiant(alpha, beta, n),
                 expected_value,
                 "Incorrect return value for baby-step giant-step algorithm"
+            )
+
+            self.assertEqual(
+                dislog.pohlighellman(alpha, beta, n, factorint(n)),
+                expected_value,
+                "Incorrect return value for pohlig-hellman algorithm"
             )
 
 if __name__ == '__main__':
