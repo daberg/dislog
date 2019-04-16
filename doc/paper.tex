@@ -87,9 +87,9 @@ This method leverages the prime factorization of the group order: $n = p_1^{e_1}
 
 For $1 \leq i \leq r$, the algorithm calculates $x_i = x \bmod{p_i^{e_i}}$, obtaining a set of congruences that can ultimately be solved with the Chinese Remainder Theorem to find $x$.
 
-In particular, for each $p_i^{e_i}$, the algorithm calculates the $p_i$-ary representation of $x$:
+In particular each $x_i$ can be seen as a truncated $p_i$-ary representation of $x$:
 $$x_i = x \bmod{p_i^{e_i}} = l_0 + l_1 p_i + l_2 p_i^2 + \ldots + l_{e_i - 1} p_i^{e_i - 1},$$
-which allows for a further reduction of the magnitude of the calculations.
+which allows for a further reduction of the magnitude of the calculations. Let us examine how the digits are calculated.
 
 From the definition of modulus, there exists some integer $h$ for which $x=x_i+hp_i^{e_i}$. Since \mbox{$\beta=\alpha^x$}, one can derive:
 \begin{align*}
@@ -105,7 +105,9 @@ from which $l_0$ can be found using any other discrete logarithm technique.
 
 Then, starting from $\beta\alpha^{-l_0} = \alpha^{l_1 p_i + l_2 p_i^2 + \ldots + l_{e_i - 1} p_i^{e_i - 1}+hp_i^{e_i}}$ and by raising both sides to the power of $\nicefrac{n}{p_i^2}$, one can obtain $(\alpha^{n/p_i})^{l_1}=(\beta\alpha^{-l_0})^{n/p_i^2}$ and ultimately $l_1$ in a similar way.
 
-The remaining digits can be computed analogously. The calculations performed for each $p_i^{e_i}$ in the first part of the algorithm are in conclusion the following:
+The remaining digits can be computed analogously.
+
+The calculations performed for each $p_i^{e_i}$ in the first part of the algorithm are in conclusion the following:
 \begin{align*}
     l_0         &              = \log_{\alpha^{n / p_i}}(\beta)^{n / p_i}                              \\
     l_1         &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0})^{n / p_i^2}               \\

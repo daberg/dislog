@@ -12,7 +12,7 @@ def babygiant(alpha, beta, n):
     power = alpha ** 0
     exp_table[power] = 0
     for j in range(1, m):
-        power = power * alpha
+        power *= alpha
         if power not in exp_table:
             exp_table[power] = j
 
@@ -23,9 +23,8 @@ def babygiant(alpha, beta, n):
     candidate = beta
     for i in range(m):
         if candidate in exp_table:
-            exp = i * m + exp_table[candidate]
-            return exp
+            return i * m + exp_table[candidate]
 
-        candidate = candidate * factor
+        candidate *= factor
 
     return None

@@ -3,11 +3,11 @@ def exhaustive(alpha, beta, n):
     power = alpha ** 0
 
     while power != beta:
-        exp = exp + 1
+        exp += 1
 
         if exp == n:
             return None
 
-        power = power * alpha
+        power *= alpha
 
     return exp
