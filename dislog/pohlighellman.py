@@ -56,10 +56,10 @@ def pohlighellman(alpha, beta, n, n_factors):
 
             prev_pow = cur_pow       # p ^ (j - 1) for j > 0
             cur_pow = next_pow       # p ^ (j)
-            next_pow = next_pow * p  # p ^ (j + 1)
+            next_pow *= p            # p ^ (j + 1)
 
-            arg_base = arg_base * (alpha ** (- prev_l * prev_pow))
-            arg_exp = n // (next_pow)
+            arg_base *= alpha ** (- prev_l * prev_pow)
+            arg_exp = n // next_pow
             arg = arg_base ** arg_exp
 
             l = dislog.exhaustive(base, arg, n)
@@ -69,7 +69,7 @@ def pohlighellman(alpha, beta, n, n_factors):
                 return None
             debug(pohlighellman, "l_({})={}", j, l)
 
-            rem = rem + l * cur_pow
+            rem += l * cur_pow
 
         debug(pohlighellman, "Found congruence: x = {} mod ({}^{})", rem, p, e)
 

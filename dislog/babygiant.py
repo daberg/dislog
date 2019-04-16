@@ -46,7 +46,7 @@ def babygiant(alpha, beta, n):
     power = alpha ** 0
     exp_table[power] = 0
     for j in range(1, m):
-        power = power * alpha
+        power *= alpha
         if power not in exp_table:
             exp_table[power] = j
         debug(babygiant, "Adding {} : {} to table", power, j)
@@ -66,7 +66,7 @@ def babygiant(alpha, beta, n):
             return exp
 
         debug(babygiant, "Candidate not found; multiplying by {}", factor)
-        candidate = candidate * factor
+        candidate *= factor
 
     debug(babygiant, "Logarithm does not exist")
     return None
