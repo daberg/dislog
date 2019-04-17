@@ -9,7 +9,6 @@ class DislogTestCase(unittest.TestCase):
         cases = [
             (2, 1, 3, 0),
             (5, 35, 97, 32),
-            (71, 210, 251, 197),
             (897, 654, 1709, None)
         ]
 
@@ -34,7 +33,13 @@ class DislogTestCase(unittest.TestCase):
             self.assertEqual(
                 dislog.pohlighellman(alpha, beta, n, factorint(n)),
                 expected_value,
-                "Incorrect return value for pohlig-hellman algorithm"
+                "Incorrect return value for Pohlig-Hellman algorithm"
+            )
+
+            self.assertEqual(
+                dislog.pollard(alpha, beta, n, dislog.modint_pollard_map),
+                expected_value,
+                "Incorrect return value for Pollard algorithm"
             )
 
 if __name__ == '__main__':
