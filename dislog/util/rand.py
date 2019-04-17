@@ -1,36 +1,45 @@
 import random
-from dislog.util import debug
-from fractions import gcd
+import dislog as dg
+import dislog.util as dgutil
+from sympy.core.numbers import igcd as gcd
+from sympy.ntheory import factorint
+from sympy.ntheory import totient
 from sympy.ntheory.primetest import isprime
 
 
-def rand_mult_integer_generator(min_int, max_int):
-    if min_int < 1 or max_int < min_int:
-        raise ValueError("Must be: 1 <= min_int <= max_int")
+def rand_cyclic_zstar(min_modulus, max_modulus):
+    if min_modulus < 2 or max_modulus < min_modulus:
+        raise ValueError("Must be: 2 <= min_modulus <= max_modulus")
 
-    numbers = list(range(min_int, max_int + 1))
-    random.shuffle(numbers)
+    moduli = list(range(min_modulus, max_modulus + 1))
+    random.shuffle(moduli)
 
-    while numbers:
-        p = numbers.pop()
+    while moduli:
+        modulus = moduli.pop()
 
-        if not isprime(p):
-            continue
+        n = totient(modulus)
+        n_primes = factorint(n).keys()
 
-        # Z*_{p + 1} has prime order p, hence any element execpt 1 will be a
-        # generator
-        modulus = p + 1
-        candidates = list(range(2, modulus))
-        random.shuffle(candidates)
+        elements = [i for i in range(modulus) if gcd(i, modulus) == 1]
+        random.shuffle(elements)
 
-        for candidate in candidates:
-            if gcd(candidate, modulus) == 1:
-                return (candidate, modulus)
+        while elements:
+            g = elements.pop()
 
-    debug(rand_mult_integer_generator, "No primes found")
+            if dgutil.isgenerator(dg.ModuloInteger(g, modulus), n, n_primes):
+                dgutil.debug(
+                    rand_cyclic_zstar,
+                    "Found Z_{} (order {}, generator {})", modulus, n, g
+                )
+                return (modulus, n, g)
+
+    dgutil.debug(
+        rand_cyclic_zstar,
+        "No cyclic Z* found in the specified interval"
+    )
     return None
 
-def rand_mult_integer(modulus):
+def rand_zstar_element(modulus):
     candidates = list(range(1, modulus))
     random.shuffle(candidates)
 
