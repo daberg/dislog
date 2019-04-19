@@ -1,30 +1,34 @@
 \documentclass[UTF8]{article}
 
-\usepackage[left=1.5in, right=1.5in, top=1.2in, bottom=1.2in]{geometry}
+\usepackage[left=1.5in, right=1.5in, top=1in, bottom=1.2in]{geometry}
 \usepackage[nice]{nicefrac}
-\usepackage{color}
+\usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[scaled]{beramono}
 
 \setlength\parindent{0pt}
 \setlength{\parskip}{\baselineskip}
 
-\definecolor{codeblue}{rgb}{0,0,0.5}
-\definecolor{codegreen}{rgb}{0,0.5,0}
-\definecolor{codeorange}{rgb}{0.9,0.6,0.1}
-\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{blue}{rgb}{0,0,0.5}
+\definecolor{green}{rgb}{0,0.5,0}
+\definecolor{orange}{rgb}{0.9,0.6,0.1}
+\definecolor{red}{rgb}{0.6,0,0}
 
 \lstset{
     language=Python,
+    basicstyle=\ttfamily\small,
+    columns=fullflexible,
+    emph={exhaustive, babygiant, _map, pollard, pohlighellman},
+    otherkeywords={True,False},
+    emphstyle=\color{red},
+    keywordstyle=\color{blue},
     aboveskip=\baselineskip,
     belowskip=\baselineskip,
-    basicstyle=\ttfamily,
-    emphstyle=\bf\color{codered},
-    keywordstyle=\color{codeblue},
-    stringstyle=\color{codegreen},
-    otherkeywords={True,False},
-    emph={exhaustive, babygiant, pohlighellman, pollard}
+    showstringspaces=false
 }
 
 \begin{document}
@@ -38,7 +42,7 @@
 \maketitle
 
 \begin{abstract}
-\noindent In this document we present the cryptographic problem of discrete logarithm and a number of algorithms to solve it, along with our implementation of said algorithms in the Python programming language. In particular, the following algorithms will be examined: exhaustive search, Baby-Step Giant-Step, Pohlig-Hellman, Pollard's rho.
+\noindent In this document we present the cryptographic problem of discrete logarithm and a number of algorithms to solve it, along with our implementation of said algorithms in the Python programming language. In particular, the following algorithms will be examined: exhaustive search, Baby-Step Giant-Step, Pollard's Rho, Pohlig-Hellman.
 \end{abstract}
 
 \section{The discrete logarithm problem}
@@ -75,11 +79,68 @@ Then, for $0 \leq i < m$, $\beta (\alpha^{-m})^i$ is computed. At each iteration
 \lstinputlisting{lst2-babygiant.py}
 \end{minipage}
 
-In the first part of the implementation $m = \sqrt{n}$ is computed using a fixed precision arithmetics library to handle big numbers. In particular, the square root is calculated at least up to the first decimal place and then rounded up.
+In the first part, if $m$ has not been specified, it is calculated as $\sqrt{n}$. The lookup table is then constructed accordingly.
 
 In each iteration of the last part, $\beta (\alpha^{-m})^i$ is computed by multiplying the $candidate$ variable, initially set to $\beta$, by the precomputed value $\alpha^{-m}$.
 
-The time complexity is asymptotically dominated by the $O(\sqrt{n})$ initial multiplications, while the space complexity amounts to $\sqrt{n}$ group elements.
+The time complexity is asymptotically dominated by the $O(m)$ initial multiplications (which are $O(\sqrt{n})$ if $m$ is set to $\sqrt{n}$), while the space complexity amounts to $m$ group elements.
+
+\subsection{Pollard's Rho algorithm for logarithms}
+
+This randomized algorithm explores a sequence of group elements $\gamma_i = \alpha^{a_i} \beta^{b_i}$ looking for a cycle using Floyd's algorithm.
+
+Detecting a cycle means discovering two elements $\gamma_c = \alpha^{a}\beta^{b}$ and $\gamma_{2c} = \alpha^{A} \beta^{B}$ in the sequence, such that $\gamma_c = \gamma_{2c}$.
+
+It follows that $\alpha^{a} \beta^{b} = \alpha^{A} \beta^{B}$, and so $\beta^{b - B} = \alpha^{a - A}$. By taking the logarithm to the base of $\alpha$ of both sides of the equation one obtains:
+$$(b - B) \log_\alpha{\beta} \equiv (a - A) \pmod{n}.$$
+
+If $b \not\equiv B \pmod{n}$, the algorithm calculates the logarithm in the following way:
+$$x = (b - B)^{-1} (A - a) \bmod{n},$$
+otherwise it terminates with failure.
+
+Let us discuss how the sequence of group elements is generated. To increase the likelihood of obtaining a cycle in a small number of samples, G is partitioned into three disjoint subsets $S_0$, $S_1$ and $S_2$ of approximately equal size and chosen in a sufficiently ``random'' manner.
+
+The map for group elements $f: G \rightarrow G$ is then defined as:
+$$
+f(\gamma) =
+\begin{cases}
+    \beta \gamma  & \enspace \text{if } \gamma \in S_0 \\
+    \gamma^2      & \enspace \text{if } \gamma \in S_1 \\
+    \alpha \gamma & \enspace \text{if } \gamma \in S_2
+\end{cases},
+$$
+
+while the map for $a_i$ coefficients $g: G \times \mathbb{N} \rightarrow \mathbb{N}$ and the map for $b_i$ coefficients $h: G \times \mathbb{N} \rightarrow \mathbb{N}$ are consequently defined as:
+$$
+g(\gamma, a) =
+\begin{cases}
+    a                & \enspace \text{if } \gamma \in S_0 \\
+    (2a)    \bmod{n} & \enspace \text{if } \gamma \in S_1 \\
+    (a + 1) \bmod{n} & \enspace \text{if } \gamma \in S_2
+\end{cases},
+\qquad
+h(\gamma, b) =
+\begin{cases}
+    (b + 1) \bmod{n} & \enspace \text{if } \gamma \in S_0 \\
+    (2b)    \bmod{n} & \enspace \text{if } \gamma \in S_1 \\
+    b                & \enspace \text{if } \gamma \in S_2
+\end{cases}.
+$$
+
+The algorithm starts by iterating over the sequence induced the above maps; in particular, at each step $i$ it computes:
+\begin{align*}
+    \gamma_{i}  & = f(\gamma_{i-1})  & a_{i}  & = g(\gamma_{i-1}, a_{i-1})   & b_{i}    & = h(\gamma_{i-1}, a_{i-1})   \\
+    \gamma_{2i} & = f(\gamma_{2i-2}) & a_{2i} & = g(\gamma_{2i-2}, a_{2i-2}) & b_{2i-2} & = h(\gamma_{2i-2}, b_{2i-2}),
+\end{align*}
+and compares the obtained $\gamma_{i}$ and $\gamma_{2i}$ values.
+
+When the algorithm finds $\gamma_{i} = \gamma_{2i}$, that is when a cycle is detected, if ($b_{i} - b_{2i}) \bmod{n} \not= 0$ the algorithm returns the logarithm:
+$$x = (b_{i} - b_{2i})^{-1} (a_{2i} - a_{i}) \bmod{n},$$
+otherwise it terminates with failure as previously discussed.
+
+\begin{minipage}{\linewidth}
+\lstinputlisting{lst3-pollard.py}
+\end{minipage}
 
 \subsection{Pohlig-Hellman algorithm}
 
@@ -118,20 +179,20 @@ The calculations performed for each $p_i^{e_i}$ in the first part of the algorit
 
 Determining all the $x_i$ values yields a set of congruences of the following type:
 \begin{align*}
-    x & \equiv x_1 \bmod{p_1^{e_1}} \\
+    x & \equiv x_1 \pmod{p_1^{e_1}} \\
       & \vdotswithin{\equiv}        \\
-    x & \equiv x_r \bmod{p_r^{e_r}},
+    x & \equiv x_r \pmod{p_r^{e_r}},
 \end{align*}
 where the moduli are pairwise coprime by construction. The Chinese Remainder Theorem hence guarantees the existence of a solution $x$, which can be found with any suitable computational method (e.g. Gauss's algorithm).
 
 \begin{minipage}{\linewidth}
-\lstinputlisting{lst3-pohlighellman.py}
+\lstinputlisting{lst4-pohlighellman.py}
 \end{minipage}
 
 The prime factorization of $n$ is passed as fourth argument in the form of a Python dictionary, with keys being the prime factors and values are respectively their exponents.
 
 Notice that during the computation of an $x_i$ value, at each iteration $j$ in the internal loop the implementation keeps track of the necessary powers of $p_i$ ($p_i^{j-1}$, $p_i^j$ and $p_i^{j+1}$), so that only one multiplication is enough to calculate them at each step.
 
-The running time is given by $O(\sum_{i=1}^{r}e_i(\lg n + \sqrt{p_i}))$.
+The running time is given by $O(\sum_{i=1}^{r}e_i(\lg n + \sqrt{p_i}))$ group multiplications.
 
 \end{document}
