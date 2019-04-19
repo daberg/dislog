@@ -38,6 +38,29 @@ def _map(a, b, x, alpha, beta, n, s_num):
     return (a, b, x)
 
 def pollard(alpha, beta, n, s_map, a_start=0, b_start=0):
+    """Computes discrete logarithm using Pollard's Rho algorithm.
+
+    Given a generator alpha of a cyclic group G, another element beta of G,
+    the order n of G and a suitable partitioning function on G, computes the
+    discrete logarithm of beta to the base of alpha using Pollard's algorithm.
+
+    Args:
+        alpha: logarithm base, must support internal equality and
+            multiplication and integer exponentiation; should be a generator to
+            guarantee the existence of the logarithm
+        beta: logarithm argument, must support internal equality and
+            multiplication and integer exponentiation
+        n: order of the group containing alpha and beta
+        s_map: function mapping group elements to their partition; must returns
+            an integer between 0 and 2 representing the partition number
+        a_start: starting coefficient in the sequence of the alpha exponents
+        b_start: starting coefficient in the sequence of the beta exponents
+
+    Returns:
+        The discrete logarithm log_{alpha}(beta) (the integer x such that alpha
+        to the power of x equals beta) if it exists and it finds it given the
+        starting parameters, None otherwise
+    """
     debug(pollard, "alpha={} beta={} n={}", alpha, beta, n)
     debug(pollard, "s_map={} a_start={} b_start={}", s_map, a_start, b_start)
 
