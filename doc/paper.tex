@@ -1,41 +1,41 @@
 \documentclass[UTF8]{article}
 
-\usepackage[left=1.5in, right=1.5in, top=1in, bottom=1.2in]{geometry}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage[T1]{fontenc}
+\usepackage[left=1.5in, right=1.5in, top=0.8in, bottom=1in]{geometry}
 \usepackage[nice]{nicefrac}
-\usepackage{xcolor}
-\usepackage{graphicx}
 \usepackage{listings}
 \usepackage{mathtools}
-\usepackage{amssymb}
-\usepackage[T1]{fontenc}
-\usepackage[scaled]{beramono}
+\usepackage{xcolor}
 
 \setlength\parindent{0pt}
 \setlength{\parskip}{\baselineskip}
+\widowpenalties 1 10000
 
 \definecolor{blue}{rgb}{0,0,0.5}
-\definecolor{green}{rgb}{0,0.5,0}
-\definecolor{orange}{rgb}{0.9,0.6,0.1}
 \definecolor{red}{rgb}{0.6,0,0}
 
 \lstset{
     language=Python,
     basicstyle=\ttfamily\small,
     columns=fullflexible,
+    frame=L,
+    numbers=left,
     emph={exhaustive, babygiant, _map, pollard, pohlighellman},
     otherkeywords={True,False},
     emphstyle=\color{red},
     keywordstyle=\color{blue},
-    aboveskip=\baselineskip,
-    belowskip=\baselineskip,
     showstringspaces=false
 }
+
+\renewcommand{\figurename}{Python Implementation}
 
 \begin{document}
 
 \title{
-    Discrete logarithm algorithms \\
-    \large Description and implementation
+    Discrete Logarithm Algorithms \\
+    \large Description and Implementation
 }
 \author{Davide Bergamaschi}
 \date{2019}
@@ -45,25 +45,29 @@
 \noindent In this document we present the cryptographic problem of discrete logarithm and a number of algorithms to solve it, along with our implementation of said algorithms in the Python programming language. In particular, the following algorithms will be examined: exhaustive search, Baby-Step Giant-Step, Pollard's Rho, Pohlig-Hellman.
 \end{abstract}
 
-\section{The discrete logarithm problem}
+\section{The Discrete Logarithm Problem}
 
 Let $G$ be a cyclic group of order $n$, let $\alpha$ be a generator of G and let $\beta$ belong to G. The discrete logarithm of $\beta$ to the base $\alpha$ ($\log_{\alpha}\beta$) is the integer value $x$ such that $0 \leq x \leq n - 1$ and $\alpha^x=\beta$.
 
-\section{Solving discrete logarithms}
+\section{Solving Discrete Logarithms}
 
 Calculating discrete logarithms is in general a computationally hard problem. In the following section we present a selection algorithms that perform this task with different levels of sophistication.
 
-Each algorithm is implemented by a Python function which takes $\alpha$, $\beta$ and $n$ as its first arguments, and returns either $\log_{\alpha}\beta$ or $None$ if the logarithm cannot be found due to input data not respecting preconditions (e.g. if $\alpha$ is not a generator).
+Each algorithm is implemented by a Python function which takes $\alpha$, $\beta$ and $n$ as its first arguments, and returns either $\log_{\alpha}\beta$ or $None$ if the logarithm cannot be found due to input data not respecting preconditions (e.g. if $\alpha$ is not a generator) or in case of failure of a randomized algorithm.
 
 \newpage
 
-\subsection{Exhaustive search}
+\subsection{Exhaustive Search}
 
 This naive method consists in computing $\alpha^0, \alpha^1, \ldots, \alpha^{n - 1}$ until $\beta$ is eventually obtained.
 
-\begin{minipage}{\linewidth}
-\lstinputlisting{lst1-exhaustive.py}
-\end{minipage}
+\begin{figure}[H]
+    \centering
+    \caption{Exhaustive Search}
+    \begin{tabular}{c}
+        \lstinputlisting{lst1-exhaustive.py}
+    \end{tabular}
+\end{figure}
 
 The time complexity is trivially given by $O(n)$ multiplications.
 
@@ -73,30 +77,31 @@ This method relies on the fact that the logarithm $x$ can be written as $x = i m
 
 The algorithm hence proceeds in the following way. For $0 \leq j < m$, entries $(a^j, j)$ are computed and stored in a hash table (hashed on the first component).
 
-Then, for $0 \leq i < m$, $\beta (\alpha^{-m})^i$ is computed. At each iteration the algorithm checks if the obtained value is present in the hash table. Upon finding a match with a value $j$, the logarithm x is obtained as $x = i m + j$.
+Then, for $0 \leq i < \lceil n / m \rceil$, $\beta (\alpha^{-m})^i$ is computed. At each iteration the algorithm checks if the obtained value is present in the hash table. Upon finding a match with a value $j$, the logarithm x is obtained as $x = i m + j$.
 
-\begin{minipage}{\linewidth}
-\lstinputlisting{lst2-babygiant.py}
-\end{minipage}
+\begin{figure}[H]
+    \centering
+    \caption{Baby-Step Giant-Step}
+    \begin{tabular}{c}
+        \lstinputlisting{lst2-babygiant.py}
+    \end{tabular}
+\end{figure}
 
-In the first part, if $m$ has not been specified, it is calculated as $\sqrt{n}$. The lookup table is then constructed accordingly.
+In the first part, if \verb|m| has not been specified, it is calculated as $\lceil \sqrt{n} \rceil$. The lookup table is then constructed accordingly.
 
-In each iteration of the last part, $\beta (\alpha^{-m})^i$ is computed by multiplying the $candidate$ variable, initially set to $\beta$, by the precomputed value $\alpha^{-m}$.
+In each iteration of the last part, $\beta (\alpha^{-m})^i$ is computed by multiplying the \verb|candidate| variable, initially set to $\beta$, by the precomputed value $\alpha^{-m}$.
 
-The time complexity is asymptotically dominated by the $O(m)$ initial multiplications (which are $O(\sqrt{n})$ if $m$ is set to $\sqrt{n}$), while the space complexity amounts to $m$ group elements.
+The algorithm performs $O(m)$ group multiplications while constructing the table, and $O(n/m)$ multiplications and lookups in the last part. If $m$ is set to $\sqrt{n}$, the time complexity becomes $O(\sqrt{n})$. The space complexity is instead given by the $m$ group elements stored by the algorithm.
 
-\subsection{Pollard's Rho algorithm for logarithms}
+\subsection{Pollard's Rho Algorithm for Logarithms}
 
 This randomized algorithm explores a sequence of group elements $\gamma_i = \alpha^{a_i} \beta^{b_i}$ looking for a cycle using Floyd's algorithm.
 
 Detecting a cycle means discovering two elements $\gamma_c = \alpha^{a}\beta^{b}$ and $\gamma_{2c} = \alpha^{A} \beta^{B}$ in the sequence, such that $\gamma_c = \gamma_{2c}$.
 
-It follows that $\alpha^{a} \beta^{b} = \alpha^{A} \beta^{B}$, and so $\beta^{b - B} = \alpha^{a - A}$. By taking the logarithm to the base of $\alpha$ of both sides of the equation one obtains:
-$$(b - B) \log_\alpha{\beta} \equiv (a - A) \pmod{n}.$$
-
-If $b \not\equiv B \pmod{n}$, the algorithm calculates the logarithm in the following way:
-$$x = (b - B)^{-1} (A - a) \bmod{n},$$
-otherwise it terminates with failure.
+It follows that $\alpha^{a} \beta^{b} = \alpha^{A} \beta^{B}$, and so $\beta^{b - B} = \alpha^{a - A}$. By taking the logarithm to the base of $\alpha$ of both sides of the equation one obtains the following equation:
+$$(b - B) \log_\alpha{\beta} \equiv (a - A) \pmod{n},$$
+which can be solved to find $x=\log_\alpha{\beta}$, but only if $b \not\equiv B \pmod{n}$.
 
 Let us discuss how the sequence of group elements is generated. To increase the likelihood of obtaining a cycle in a small number of samples, G is partitioned into three disjoint subsets $S_0$, $S_1$ and $S_2$ of approximately equal size and chosen in a sufficiently ``random'' manner.
 
@@ -127,22 +132,30 @@ h(\gamma, b) =
 \end{cases}.
 $$
 
-The algorithm starts by iterating over the sequence induced the above maps; in particular, at each step $i$ it computes:
+The algorithm begins by iterating over the sequence induced by the above maps, starting from two random coefficients $a_0$ and $b_0$ (and with $x_0 = \alpha^{a_0} \beta^{b_0}$); in particular, at each step $i$ it computes:
 \begin{align*}
-    \gamma_{i}  & = f(\gamma_{i-1})  & a_{i}  & = g(\gamma_{i-1}, a_{i-1})   & b_{i}    & = h(\gamma_{i-1}, a_{i-1})   \\
-    \gamma_{2i} & = f(\gamma_{2i-2}) & a_{2i} & = g(\gamma_{2i-2}, a_{2i-2}) & b_{2i-2} & = h(\gamma_{2i-2}, b_{2i-2}),
+    \gamma_{i}  & = f(\gamma_{i-1})  & a_{i}  & = g(\gamma_{i-1}, a_{i-1})   & b_{i}  & = h(\gamma_{i-1}, a_{i-1})   \\
+    \gamma_{2i} & = f(\gamma_{2i-2}) & a_{2i} & = g(\gamma_{2i-2}, a_{2i-2}) & b_{2i} & = h(\gamma_{2i-2}, b_{2i-2}),
 \end{align*}
 and compares the obtained $\gamma_{i}$ and $\gamma_{2i}$ values.
 
 When the algorithm finds $\gamma_{i} = \gamma_{2i}$, that is when a cycle is detected, if ($b_{i} - b_{2i}) \bmod{n} \not= 0$ the algorithm returns the logarithm:
 $$x = (b_{i} - b_{2i})^{-1} (a_{2i} - a_{i}) \bmod{n},$$
-otherwise it terminates with failure as previously discussed.
+otherwise it terminates with failure.
 
-\begin{minipage}{\linewidth}
-\lstinputlisting{lst3-pollard.py}
-\end{minipage}
+\begin{figure}[H]
+    \centering
+    \caption{Pollard's Rho Algorithm for Logarithms}
+    \begin{tabular}{c}
+        \lstinputlisting{lst3-pollard.py}
+    \end{tabular}
+\end{figure}
 
-\subsection{Pohlig-Hellman algorithm}
+The \verb|s_map| argument is a function which takes a group element as input and returns the index of the partition to which the element belongs.
+
+For what concerns asymptotic complexity, if it can be assumed that the map $f$ behaves like a random function, the expected running time will be of $O(\sqrt{n})$ group operations. On the other hand, the required storage is negligible.
+
+\subsection{Pohlig-Hellman Algorithm}
 
 This method leverages the prime factorization of the group order: $n = p_1^{e_1} \ldots p_r^{e_r}$.
 
@@ -150,12 +163,14 @@ For $1 \leq i \leq r$, the algorithm calculates $x_i = x \bmod{p_i^{e_i}}$, obta
 
 In particular each $x_i$ can be seen as a truncated $p_i$-ary representation of $x$:
 $$x_i = x \bmod{p_i^{e_i}} = l_0 + l_1 p_i + l_2 p_i^2 + \ldots + l_{e_i - 1} p_i^{e_i - 1},$$
-which allows for a further reduction of the magnitude of the calculations. Let us examine how the digits are calculated.
+which allows for a further reduction of the magnitude of the calculations.
+
+Let us examine how the digits are calculated.
 
 From the definition of modulus, there exists some integer $h$ for which $x=x_i+hp_i^{e_i}$. Since \mbox{$\beta=\alpha^x$}, one can derive:
 \begin{align*}
-    \beta^{n/p_i} & = (\alpha^x)^{n/p_i}                \\
-                  & = (\alpha^{n/p_i})^x                \\
+    \beta^{n/p_i} & = (\alpha^x)^{n/p_i} \\
+                  & = (\alpha^{n/p_i})^x \\
                   & = (\alpha^{n/p_i})^{x_i+hp_i^{e_i}} \\
                   & = (\alpha^{n/p_i})^{l_0 + l_1 p_i + l_2 p_i^2 + \ldots + l_{e_i - 1} p_i^{e_i - 1}+hp_i^{e_i}} \\
                   & = (\alpha^{n/p_i})^{l_0 + K p_i} \quad \text{\small{(for some integer $K$)}}  \\
@@ -170,10 +185,10 @@ The remaining digits can be computed analogously.
 
 The calculations performed for each $p_i^{e_i}$ in the first part of the algorithm are in conclusion the following:
 \begin{align*}
-    l_0         &              = \log_{\alpha^{n / p_i}}(\beta)^{n / p_i}                              \\
-    l_1         &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0})^{n / p_i^2}               \\
-    l_2         &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0 - l_1 \, p_i})^{n / p_i^3}  \\
-                & \vdotswithin{=}                                                                      \\
+    l_0         &              = \log_{\alpha^{n / p_i}}(\beta)^{n / p_i} \\
+    l_1         &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0})^{n / p_i^2} \\
+    l_2         &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0 - l_1 \, p_i})^{n / p_i^3} \\
+                & \vdotswithin{=} \\
     l_{e_i - 1} &              = \log_{\alpha^{n / p_i}}(\beta\alpha^{-l_0 - l_1 \, p_i - \, \ldots \, - l_{e_i - 2} \ p_i^{e_i - 2}})^{n / p_i^{e_i}}.
 \end{align*}
 
@@ -181,13 +196,18 @@ Determining all the $x_i$ values yields a set of congruences of the following ty
 \begin{align*}
     x & \equiv x_1 \pmod{p_1^{e_1}} \\
       & \vdotswithin{\equiv}        \\
-    x & \equiv x_r \pmod{p_r^{e_r}},
+    x & \equiv x_r \pmod{p_r^{e_r}}.
 \end{align*}
-where the moduli are pairwise coprime by construction. The Chinese Remainder Theorem hence guarantees the existence of a solution $x$, which can be found with any suitable computational method (e.g. Gauss's algorithm).
 
-\begin{minipage}{\linewidth}
-\lstinputlisting{lst4-pohlighellman.py}
-\end{minipage}
+Since the moduli are pairwise coprime by construction, the Chinese Remainder Theorem guarantees the existence of a solution $x$, which can be found with any suitable computational method (e.g. Gauss's algorithm).
+
+\begin{figure}[H]
+    \centering
+    \caption{Pohlig-Hellman Algorithm}
+    \begin{tabular}{c}
+        \lstinputlisting{lst4-pohlighellman.py}
+    \end{tabular}
+\end{figure}
 
 The prime factorization of $n$ is passed as fourth argument in the form of a Python dictionary, with keys being the prime factors and values are respectively their exponents.
 

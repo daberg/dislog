@@ -1,11 +1,6 @@
-def babygiant(alpha, beta, n):
-    dec_n = decimal.Decimal(n)
-    num_digits = dec_n.adjusted() + 1
-    prec = num_digits // 2 + 2
-    context = decimal.Context(prec=prec, rounding=decimal.ROUND_UP)
-
-    dec_m = dec_n.sqrt(context)
-    m = int(dec_m.to_integral_value(context=context))
+def babygiant(alpha, beta, n, m=None):
+    if m is None:
+        m = round_sqrt(n)
 
     exp_table = {}
 
@@ -21,7 +16,7 @@ def babygiant(alpha, beta, n):
         return None
 
     candidate = beta
-    for i in range(m):
+    for i in range((n + m - 1) // m):
         if candidate in exp_table:
             return i * m + exp_table[candidate]
 
