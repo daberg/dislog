@@ -85,4 +85,4 @@ def pohlighellman(alpha, beta, n, n_factors):
     else:
         debug(pohlighellman, "No solution found")
 
-    return ret
+    return int(ret)
